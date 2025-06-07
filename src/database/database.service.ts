@@ -5,6 +5,9 @@ import { Favs } from 'src/favs/entities/favs.entity';
 import { Track } from 'src/track/entities/track.entity';
 import { User } from 'src/user/entities/user.entity';
 
+/**
+ * InMemory Database
+ **/
 @Injectable()
 export class DatabaseService {
   public readonly users = new Map<string, User>();
