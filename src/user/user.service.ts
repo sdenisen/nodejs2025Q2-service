@@ -7,17 +7,14 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-user.dto';
 import { DatabaseService } from 'src/database/database.service';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
   constructor(private readonly dbService: DatabaseService) {}
 
   getAll() {
-    const users = [...this.dbService.users.values()].map((user) =>
-      this.removeUserPasswordField(user),
-    );
-
-    return users;
+    return instanceToPlain([...this.dbService.users.values()]);
   }
 
   getById(id: string) {
@@ -26,14 +23,13 @@ export class UserService {
     }
 
     const user = this.dbService.users.get(id);
-    return this.removeUserPasswordField(user);
+    return instanceToPlain(user);
   }
 
   create({ login, password }: CreateUserDto) {
     const newUser: User = new User(login, password);
     this.dbService.users.set(newUser.id, newUser);
-
-    return this.removeUserPasswordField(newUser);
+    return instanceToPlain(newUser);
   }
 
   update(id: string, { oldPassword, newPassword }: UpdatePasswordDto) {
@@ -51,7 +47,7 @@ export class UserService {
     user.version += 1;
     user.updatedAt = Date.now();
 
-    return this.removeUserPasswordField(user);
+    return instanceToPlain(user);
   }
 
   delete(id: string) {
@@ -60,12 +56,5 @@ export class UserService {
     }
 
     this.dbService.users.delete(id);
-  }
-
-  removeUserPasswordField(user: User) {
-    const userWithoutPassword = { ...user };
-    delete userWithoutPassword.password;
-
-    return userWithoutPassword;
   }
 }
