@@ -1,0 +1,8 @@
+node_modules
+postgres
+.git
+dist
+test
+.gitignore
+Dockerfile
+README.md

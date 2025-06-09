@@ -32,7 +32,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: npm run start:dev
+    command: npm run start:migrate:dev
     restart: always
     networks:
       - docker-network
