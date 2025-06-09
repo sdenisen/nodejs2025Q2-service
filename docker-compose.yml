@@ -1,4 +1,24 @@
 services:
+
+  postgres-db:
+    restart: always
+    image: postgres:latest
+    container_name: postgres-db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - docker-network
+    depends_on:
+      - rest-service
+
   rest-service:
     container_name: rest-api
     build:
@@ -19,3 +39,6 @@ services:
 
 networks:
   docker-network:
+
+volumes:
+  pgdata:
