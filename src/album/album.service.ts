@@ -3,20 +3,18 @@ import { CreateAlbumDto } from './dto/create-album.dto';
 import { Album } from './entities/album.entity';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { DatabaseService } from 'src/database/database.service';
+import { getOrThrow } from '../common/get-or-throw';
 
 @Injectable()
 export class AlbumService {
   constructor(private readonly dbService: DatabaseService) {}
+
   getAll() {
     return [...this.dbService.albums.values()];
   }
 
   getById(id: string) {
-    if (!this.dbService.albums.has(id)) {
-      throw new NotFoundException('Album not found');
-    }
-
-    return this.dbService.albums.get(id);
+    return getOrThrow(this.dbService.albums, id, 'Album not found');
   }
 
   create({ name, year, artistId }: CreateAlbumDto) {
@@ -27,11 +25,7 @@ export class AlbumService {
   }
 
   update(id: string, updateArtistDto: UpdateAlbumDto) {
-    if (!this.dbService.albums.has(id)) {
-      throw new NotFoundException('Album not found');
-    }
-
-    const album = this.dbService.albums.get(id);
+    const album = getOrThrow(this.dbService.albums, id, 'Album not found');
     const updatedAlbum = { ...album, ...updateArtistDto };
     this.dbService.albums.set(id, updatedAlbum);
 
@@ -39,9 +33,7 @@ export class AlbumService {
   }
 
   delete(id: string) {
-    if (!this.dbService.albums.has(id)) {
-      throw new NotFoundException('Album not found');
-    }
+    getOrThrow(this.dbService.albums, id, 'Album not found');
 
     this.dbService.tracks.forEach((value, key) => {
       if (value.albumId === id) {

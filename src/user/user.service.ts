@@ -1,13 +1,13 @@
 import {
   ForbiddenException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-user.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { instanceToPlain } from 'class-transformer';
+import { getOrThrow } from '../common/get-or-throw';
 
 @Injectable()
 export class UserService {
@@ -18,11 +18,7 @@ export class UserService {
   }
 
   getById(id: string) {
-    if (!this.dbService.users.has(id)) {
-      throw new NotFoundException('User not found');
-    }
-
-    const user = this.dbService.users.get(id);
+    const user = getOrThrow(this.dbService.users, id, 'User not found');
     return instanceToPlain(user);
   }
 
@@ -33,11 +29,7 @@ export class UserService {
   }
 
   update(id: string, { oldPassword, newPassword }: UpdatePasswordDto) {
-    if (!this.dbService.users.has(id)) {
-      throw new NotFoundException('User not found');
-    }
-
-    const user = this.dbService.users.get(id);
+    const user = getOrThrow(this.dbService.users, id, 'User not found');
 
     if (user.password !== oldPassword) {
       throw new ForbiddenException('Old password is wrong');
@@ -51,10 +43,7 @@ export class UserService {
   }
 
   delete(id: string) {
-    if (!this.dbService.users.has(id)) {
-      throw new NotFoundException('User not found');
-    }
-
+    getOrThrow(this.dbService.users, id, 'User not found');
     this.dbService.users.delete(id);
   }
 }

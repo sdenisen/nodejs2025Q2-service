@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { Track } from './entities/track.entity';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { DatabaseService } from 'src/database/database.service';
+import { getOrThrow } from '../common/get-or-throw';
 
 @Injectable()
 export class TrackService {
@@ -12,10 +13,7 @@ export class TrackService {
   }
 
   getById(id: string) {
-    if (!this.dbService.tracks.has(id)) {
-      throw new NotFoundException('Track not found');
-    }
-    return this.dbService.tracks.get(id);
+    return getOrThrow(this.dbService.tracks, id, 'Track not found');
   }
 
   create({ name, artistId, albumId, duration }: CreateTrackDto) {
@@ -26,11 +24,7 @@ export class TrackService {
   }
 
   update(id: string, updateTrackDto: UpdateTrackDto) {
-    if (!this.dbService.tracks.has(id)) {
-      throw new NotFoundException('Track not found');
-    }
-
-    const track = this.dbService.tracks.get(id);
+    const track = getOrThrow(this.dbService.tracks, id, 'Track not found');
     const updatedTrack = { ...track, ...updateTrackDto };
     this.dbService.tracks.set(id, updatedTrack);
 
@@ -38,10 +32,7 @@ export class TrackService {
   }
 
   delete(id: string) {
-    if (!this.dbService.tracks.has(id)) {
-      throw new NotFoundException('Track not found');
-    }
-
+    getOrThrow(this.dbService.tracks, id, 'Track not found');
     this.dbService.favs.deleteTrack(id);
     this.dbService.tracks.delete(id);
   }
