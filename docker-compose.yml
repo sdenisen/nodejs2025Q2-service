@@ -1,0 +1,21 @@
+services:
+  rest-service:
+    container_name: rest-api
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    environment:
+      env_file: ".env"
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
+    restart: always
+    networks:
+      - docker-network
+
+networks:
+  docker-network:
