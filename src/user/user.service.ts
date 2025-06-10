@@ -11,10 +11,15 @@ export class UserService {
     return this.prisma.user.findMany();
   }
 
-  getById(id: string) {
-    return this.prisma.user.findUniqueOrThrow({
+  async getById(id: string) {
+    const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: id },
     });
+    return {
+      ...user,
+      createdAt: Number(user.createdAt.getTime()),
+      updatedAt: Number(user.updatedAt.getTime()),
+    };
   }
 
   async create({ login, password }: CreateUserDto) {
@@ -30,8 +35,8 @@ export class UserService {
     });
     return {
       ...user,
-      createdAt: user.createdAt.getTime(),
-      updatedAt: user.updatedAt.getTime(),
+      createdAt: Number(user.createdAt.getTime()),
+      updatedAt: Number(user.updatedAt.getTime()),
     };
   }
 
@@ -62,8 +67,8 @@ export class UserService {
 
     return {
       ...updated_user,
-      createdAt: updated_user.createdAt.getTime(),
-      updatedAt: updated_user.updatedAt.getTime(),
+      createdAt: Number(updated_user.createdAt.getTime()),
+      updatedAt: Number(updated_user.updatedAt.getTime()),
     };
   }
 
