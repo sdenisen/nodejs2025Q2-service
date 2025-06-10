@@ -4,46 +4,51 @@ import { Album } from './entities/album.entity';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { getOrThrow } from '../common/get-or-throw';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly dbService: DatabaseService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   getAll() {
-    return [...this.dbService.albums.values()];
+    return this.prisma.album.findMany();
   }
 
   getById(id: string) {
-    return getOrThrow(this.dbService.albums, id, 'Album not found');
+    return this.prisma.album.findUniqueOrThrow({ where: { id: id } });
   }
 
-  create({ name, year, artistId }: CreateAlbumDto) {
-    const newAlbum = new Album(name, year, artistId);
-    this.dbService.albums.set(newAlbum.id, newAlbum);
-
+  async create({ name, year, artistId }: CreateAlbumDto) {
+    const newAlbum = await this.prisma.album.create({
+      data: { name, year, artistId },
+    });
     return newAlbum;
   }
 
-  update(id: string, updateArtistDto: UpdateAlbumDto) {
-    const album = getOrThrow(this.dbService.albums, id, 'Album not found');
-    const updatedAlbum = { ...album, ...updateArtistDto };
-    this.dbService.albums.set(id, updatedAlbum);
-
-    return updatedAlbum;
+  async update(id: string, updateArtistDto: UpdateAlbumDto) {
+    await this.prisma.album.findUniqueOrThrow({ where: { id: id } });
+    const updated_album = await this.prisma.album.update({
+      where: { id: id },
+      data: updateArtistDto,
+    });
+    return updated_album;
   }
 
-  delete(id: string) {
-    getOrThrow(this.dbService.albums, id, 'Album not found');
-
-    this.dbService.tracks.forEach((value, key) => {
-      if (value.albumId === id) {
-        const track = this.dbService.tracks.get(key);
-        track.albumId = null;
-      }
+  async delete(id: string) {
+    await this.prisma.album.findUniqueOrThrow({ where: { id: id } });
+    const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
+    if (fav) {
+      const filtered = fav.albums.filter((albumId) => albumId !== id);
+      await this.prisma.favorites.update({
+        where: { id: 0 },
+        data: { albums: { set: filtered } },
+      });
+    }
+    await this.prisma.track.updateMany({
+      where: { albumId: id },
+      data: { albumId: null },
     });
 
-    this.dbService.favs.deleteAlbum(id);
-
-    this.dbService.albums.delete(id);
+    await this.prisma.album.delete({ where: { id: id } });
   }
 }
