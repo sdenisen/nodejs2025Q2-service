@@ -25,8 +25,12 @@ export class FavsService {
       const tracks = await this.prisma.track.findMany();
       tracks.filter((track) => fav.tracks.indexOf(track.id) !== -1);
       return { artists: artists, albums: albums, tracks: tracks };
+    } else {
+      await this.prisma.favorites.create({
+        data: { id: 0, artists: [], albums: [], tracks: [] },
+      });
     }
-    return [];
+    return { artists: [], albums: [], tracks: [] };
   }
 
   async addArtist(id: string) {
@@ -39,7 +43,7 @@ export class FavsService {
 
     const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     if (!fav) {
-      this.prisma.favorites.create({
+      await this.prisma.favorites.create({
         data: { id: 0, artists: [], albums: [], tracks: [] },
       });
     }
@@ -56,6 +60,7 @@ export class FavsService {
       where: { id: id },
     });
     const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
+    console.log(fav);
     if (fav) {
       const filtered = fav.artists.filter((artistId) => artistId !== id);
       await this.prisma.favorites.update({
@@ -72,13 +77,16 @@ export class FavsService {
     if (album === null) {
       throw new UnprocessableEntityException('User not found');
     }
-    const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
+    let fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     if (!fav) {
-      this.prisma.favorites.create({
+      await this.prisma.favorites.create({
         data: { id: 0, artists: [], albums: [], tracks: [] },
       });
+      fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     }
+
     fav.albums.push(id);
+    console.log(fav);
     await this.prisma.favorites.update({
       where: { id: 0 },
       data: { albums: { set: fav.albums } },
@@ -109,11 +117,12 @@ export class FavsService {
       throw new UnprocessableEntityException('User not found');
     }
 
-    const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
+    let fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     if (!fav) {
-      this.prisma.favorites.create({
+      await this.prisma.favorites.create({
         data: { id: 0, artists: [], albums: [], tracks: [] },
       });
+      fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     }
 
     fav.tracks.push(id);
