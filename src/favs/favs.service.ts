@@ -17,14 +17,20 @@ export class FavsService {
     const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     if (fav) {
       const artists = await this.prisma.artist.findMany();
-      artists.filter((artist) => fav.artists.indexOf(artist.id) !== -1);
+      const favorite_artists = artists.filter((artist) =>
+        fav.artists.includes(artist.id),
+      );
 
       const albums = await this.prisma.album.findMany();
-      albums.filter((album) => fav.albums.indexOf(album.id) !== -1);
+      const favorite_albums = albums.filter((album) =>
+        fav.albums.includes(album.id),
+      );
 
       const tracks = await this.prisma.track.findMany();
-      tracks.filter((track) => fav.tracks.indexOf(track.id) !== -1);
-      return { artists: artists, albums: albums, tracks: tracks };
+      const favorite_tracks = tracks.filter((track) =>
+        fav.tracks.includes(track.id),
+      );
+      return { artists: favorite_artists, albums: favorite_albums, tracks: favorite_tracks };
     } else {
       await this.prisma.favorites.create({
         data: { id: 0, artists: [], albums: [], tracks: [] },
@@ -62,7 +68,7 @@ export class FavsService {
     const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     console.log(fav);
     if (fav) {
-      const filtered = fav.artists.filter((artistId) => artistId !== id);
+      const filtered = fav.artists.filter((artistId) => artistId !== artist.id);
       await this.prisma.favorites.update({
         where: { id: 0 },
         data: { artists: { set: filtered } },
@@ -100,7 +106,7 @@ export class FavsService {
     });
     const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     if (fav) {
-      const filtered = fav.albums.filter((albumId) => albumId !== id);
+      const filtered = fav.albums.filter((albumId) => albumId !== album.id);
       await this.prisma.favorites.update({
         where: { id: 0 },
         data: { albums: { set: filtered } },
@@ -140,7 +146,7 @@ export class FavsService {
     });
     const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
     if (fav) {
-      const filtered = fav.tracks.filter((trackId) => trackId !== id);
+      const filtered = fav.tracks.filter((trackId) => trackId !== track.id);
       await this.prisma.favorites.update({
         where: { id: 0 },
         data: { tracks: { set: filtered } },
