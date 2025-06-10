@@ -4,6 +4,7 @@ import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { load } from 'js-yaml';
 import { resolve } from 'path';
 import { readFile } from 'fs/promises';
+import { PrismaNotFoundExceptionFilter } from './prisma/prisma-exception.filter';
 
 const readApiYaml = async () => {
   const dstPath = resolve(__dirname, '..', 'doc', 'api.yaml');
@@ -17,7 +18,7 @@ async function bootstrap() {
   const apiConfig = await readApiYaml();
   const document = load(apiConfig) as OpenAPIObject;
   SwaggerModule.setup('/doc', app, document);
-
+  app.useGlobalFilters(new PrismaNotFoundExceptionFilter());
   await app.listen(PORT);
 }
 bootstrap();

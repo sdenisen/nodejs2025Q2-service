@@ -1,10 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 
 export class User {
   readonly id: string;
   version: number;
+  @Transform(({ value }) => Number(value))
   readonly createdAt: number;
+
+  @Transform(({ value }) => Number(value))
   updatedAt: number;
   @Exclude()
   password: string;

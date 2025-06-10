@@ -14,22 +14,22 @@ datasource db {
 }
 
 model User {
-  id        String @unique
+  id        String   @id @default(uuid())
   login     String
   password  String
-  version   Int
-  createdAt String
-  updatedAt String
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Artist {
-  id     String  @unique
+  id        String   @id @default(uuid())
   name   String
   grammy Boolean
 }
 
 model Track {
-  id       String  @unique
+  id        String   @id @default(uuid())
   name     String
   artistId String?
   albumId  String?
@@ -37,7 +37,7 @@ model Track {
 }
 
 model Album {
-  id       String  @unique
+  id        String   @id @default(uuid())
   name     String
   year     Int
   artistId String?
