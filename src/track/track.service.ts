@@ -4,36 +4,47 @@ import { Track } from './entities/track.entity';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { getOrThrow } from '../common/get-or-throw';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly dbService: DatabaseService) {}
+  constructor(private prisma: PrismaService) {}
+
   getAll() {
-    return [...this.dbService.tracks.values()];
+    return this.prisma.track.findMany();
   }
 
   getById(id: string) {
-    return getOrThrow(this.dbService.tracks, id, 'Track not found');
+    return this.prisma.track.findUniqueOrThrow({ where: { id: id } });
   }
 
-  create({ name, artistId, albumId, duration }: CreateTrackDto) {
-    const newTrack = new Track(name, artistId, albumId, duration);
-    this.dbService.tracks.set(newTrack.id, newTrack);
-
-    return newTrack;
+  async create({ name, artistId, albumId, duration }: CreateTrackDto) {
+    const new_track = await this.prisma.track.create({
+      data: { name, artistId, albumId, duration },
+    });
+    return new_track;
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    const track = getOrThrow(this.dbService.tracks, id, 'Track not found');
-    const updatedTrack = { ...track, ...updateTrackDto };
-    this.dbService.tracks.set(id, updatedTrack);
-
-    return updatedTrack;
+  async update(id: string, updateTrackDto: UpdateTrackDto) {
+    await this.prisma.track.findUniqueOrThrow({ where: { id: id } });
+    const updated_track = await this.prisma.track.update({
+      where: { id: id },
+      data: updateTrackDto,
+    });
+    return updated_track;
   }
 
-  delete(id: string) {
-    getOrThrow(this.dbService.tracks, id, 'Track not found');
-    this.dbService.favs.deleteTrack(id);
-    this.dbService.tracks.delete(id);
+  async delete(id: string) {
+    await this.prisma.track.findUniqueOrThrow({ where: { id: id } });
+    const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
+    if (fav) {
+      const filtered = fav.tracks.filter((trackId) => trackId !== id);
+      await this.prisma.favorites.update({
+        where: { id: 0 },
+        data: { tracks: { set: filtered } },
+      });
+    }
+
+    await this.prisma.track.delete({ where: { id: id } });
   }
 }

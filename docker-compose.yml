@@ -2,7 +2,7 @@ services:
 
   postgres-db:
     restart: always
-    image: postgres:latest
+    image: postgres:15-alpine
     container_name: postgres-db
     env_file:
       - .env
