@@ -6,3 +6,7 @@ test
 .gitignore
 Dockerfile
 README.md
+npm-debug.log
+tests
+.env
+coverage
