@@ -4,53 +4,56 @@ import { Artist } from './entities/artist.entity';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { getOrThrow } from '../common/get-or-throw';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ArtistService {
-  constructor(private readonly dbService: DatabaseService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   getAll() {
-    return [...this.dbService.artists.values()];
+    return this.prisma.artist.findMany();
   }
 
   getById(id: string) {
-    return getOrThrow(this.dbService.artists, id, 'Artist not found');
+    return this.prisma.artist.findUniqueOrThrow({ where: { id: id } });
   }
 
-  create({ name, grammy }: CreateArtistDto) {
-    const newArtist = new Artist(name, grammy);
-    this.dbService.artists.set(newArtist.id, newArtist);
-
-    return newArtist;
+  async create({ name, grammy }: CreateArtistDto) {
+    const new_artist = await this.prisma.artist.create({
+      data: { name, grammy },
+    });
+    return new_artist;
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    const artist = getOrThrow(this.dbService.artists, id, 'Artist not found');
-    const updatedArtist = { ...artist, ...updateArtistDto };
-    this.dbService.artists.set(id, updatedArtist);
-
-    return updatedArtist;
+  async update(id: string, updateArtistDto: UpdateArtistDto) {
+    await this.prisma.artist.findUniqueOrThrow({ where: { id: id } });
+    const updated_artist = await this.prisma.artist.update({
+      where: { id: id },
+      data: updateArtistDto,
+    });
+    return updated_artist;
   }
 
-  delete(id: string) {
-    getOrThrow(this.dbService.artists, id, 'Artist not found');
-
-    this.dbService.albums.forEach((value, key) => {
-      if (value.artistId === id) {
-        const album = this.dbService.albums.get(key);
-        album.artistId = null;
-      }
+  async delete(id: string) {
+    await this.prisma.artist.findUniqueOrThrow({ where: { id: id } });
+    const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
+    if (fav) {
+      const filtered = fav.artists.filter((artistId) => artistId !== id);
+      await this.prisma.favorites.update({
+        where: { id: 0 },
+        data: { artists: { set: filtered } },
+      });
+    }
+    await this.prisma.track.updateMany({
+      where: { artistId: id },
+      data: { artistId: null },
     });
 
-    this.dbService.tracks.forEach((value, key) => {
-      if (value.artistId === id) {
-        const track = this.dbService.tracks.get(key);
-        track.artistId = null;
-      }
+    await this.prisma.album.updateMany({
+      where: { artistId: id },
+      data: { artistId: null },
     });
 
-    this.dbService.favs.deleteArtist(id);
-
-    this.dbService.artists.delete(id);
+    await this.prisma.artist.delete({ where: { id: id } });
   }
 }
