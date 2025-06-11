@@ -1,0 +1,44 @@
+services:
+
+  postgres-db:
+    restart: always
+    image: postgres:15-alpine
+    container_name: postgres-db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - docker-network
+    depends_on:
+      - rest-service
+
+  rest-service:
+    container_name: rest-api
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    environment:
+      env_file: ".env"
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:migrate:dev
+    restart: always
+    networks:
+      - docker-network
+
+networks:
+  docker-network:
+
+volumes:
+  pgdata:

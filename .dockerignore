@@ -1,0 +1,12 @@
+node_modules
+postgres
+.git
+dist
+test
+.gitignore
+Dockerfile
+README.md
+npm-debug.log
+tests
+.env
+coverage
