@@ -8,10 +8,14 @@ import { DatabaseService } from 'src/database/database.service';
 import { getOrThrow } from '../common/get-or-throw';
 import { favsEnsureHas } from '../common/favs-ensure-has';
 import { PrismaService } from '../prisma/prisma.service';
+import { LoggingService } from '../logging/logging.service';
 
 @Injectable()
 export class FavsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly logger: LoggingService,
+  ) {}
 
   async getAll() {
     const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
