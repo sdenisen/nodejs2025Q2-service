@@ -30,7 +30,11 @@ export class FavsService {
       const favorite_tracks = tracks.filter((track) =>
         fav.tracks.includes(track.id),
       );
-      return { artists: favorite_artists, albums: favorite_albums, tracks: favorite_tracks };
+      return {
+        artists: favorite_artists,
+        albums: favorite_albums,
+        tracks: favorite_tracks,
+      };
     } else {
       await this.prisma.favorites.create({
         data: { id: 0, artists: [], albums: [], tracks: [] },

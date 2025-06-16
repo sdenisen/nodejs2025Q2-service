@@ -5,12 +5,18 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { getOrThrow } from '../common/get-or-throw';
 import { PrismaService } from '../prisma/prisma.service';
+import { Logger } from '@nestjs/common';
+import { LoggingService } from '../logging/logging.service';
 
 @Injectable()
 export class ArtistService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly logger: LoggingService,
+  ) {}
 
   getAll() {
+    this.logger.log('App started');
     return this.prisma.artist.findMany();
   }
 
