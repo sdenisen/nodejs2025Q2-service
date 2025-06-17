@@ -1,17 +1,13 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { eFavs } from './entities/favs.entity';
-import { DatabaseService } from 'src/database/database.service';
-import { getOrThrow } from '../common/get-or-throw';
-import { favsEnsureHas } from '../common/favs-ensure-has';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { LoggingService } from '../logging/logging.service';
 
 @Injectable()
 export class FavsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly logger: LoggingService,
+  ) {}
 
   async getAll() {
     const fav = await this.prisma.favorites.findUnique({ where: { id: 0 } });
@@ -30,7 +26,11 @@ export class FavsService {
       const favorite_tracks = tracks.filter((track) =>
         fav.tracks.includes(track.id),
       );
-      return { artists: favorite_artists, albums: favorite_albums, tracks: favorite_tracks };
+      return {
+        artists: favorite_artists,
+        albums: favorite_albums,
+        tracks: favorite_tracks,
+      };
     } else {
       await this.prisma.favorites.create({
         data: { id: 0, artists: [], albums: [], tracks: [] },

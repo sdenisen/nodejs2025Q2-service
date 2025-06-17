@@ -1,0 +1,29 @@
+import { Module } from '@nestjs/common';
+import { UserModule } from '../user/user.module';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtStrategy } from './jwt.strategy';
+
+@Module({
+  imports: [
+    UserModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET_KEY || 'default_secret',
+      signOptions: { expiresIn: process.env.TOKEN_EXPIRE_TIME },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
+  exports: [JwtModule],
+})
+export class AuthModule {}

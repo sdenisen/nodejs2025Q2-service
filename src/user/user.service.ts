@@ -1,11 +1,20 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { LoggingService } from '../logging/logging.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly logger: LoggingService,
+  ) {}
 
   getAll() {
     return this.prisma.user.findMany();
@@ -23,6 +32,8 @@ export class UserService {
   }
 
   async create({ login, password }: CreateUserDto) {
+    password = await bcrypt.hash(password, 10);
+
     const user = await this.prisma.user.create({
       data: { login, password },
       select: {
@@ -44,11 +55,11 @@ export class UserService {
     const _user = await this.prisma.user.findUniqueOrThrow({
       where: { id: id },
     });
-
-    if (_user.password !== oldPassword) {
+    const isPasswordMatches = await bcrypt.compare(oldPassword, _user.password);
+    if (!isPasswordMatches) {
       throw new ForbiddenException('Old password is wrong');
     }
-
+    newPassword = await bcrypt.hash(newPassword, 10);
     const updated_user = await this.prisma.user.update({
       where: { id: _user.id },
       data: {
@@ -77,5 +88,17 @@ export class UserService {
       where: { id: id },
     });
     await this.prisma.user.delete({ where: { id: _user.id } });
+  }
+
+  async getByLogin(login: string) {
+    const userPrisma = await this.prisma.user.findFirst({
+      where: { login: login },
+    });
+
+    if (!userPrisma) {
+      throw new NotFoundException('User not found');
+    }
+
+    return userPrisma;
   }
 }
