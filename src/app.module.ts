@@ -13,6 +13,7 @@ import { LoggingModule } from './logging/logging.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -26,6 +27,11 @@ import { AuthModule } from './auth/auth.module';
     PrismaModule,
     LoggingModule,
     AuthModule,
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET || 'default_secret',
+      signOptions: { expiresIn: '1h' },
+    }),
   ],
   controllers: [AppController],
   providers: [

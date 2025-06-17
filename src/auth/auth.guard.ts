@@ -8,15 +8,18 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { Request } from 'express';
+import { LoggingService } from '../logging/logging.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private reflector: Reflector,
+    private readonly logging: LoggingService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logging.log('we are here...');
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
