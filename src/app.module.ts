@@ -10,6 +10,9 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggingModule } from './logging/logging.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,8 +25,15 @@ import { LoggingModule } from './logging/logging.module';
     DatabaseModule,
     PrismaModule,
     LoggingModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
