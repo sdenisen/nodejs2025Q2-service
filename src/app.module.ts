@@ -10,7 +10,6 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggingModule } from './logging/logging.module';
-import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 
