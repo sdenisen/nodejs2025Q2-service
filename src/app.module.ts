@@ -13,7 +13,6 @@ import { LoggingModule } from './logging/logging.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from './auth/auth.guard';
 
 @Module({
   imports: [
@@ -34,12 +33,6 @@ import { AuthGuard } from './auth/auth.guard';
     }),
   ],
   controllers: [AppController],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
-    AppService,
-  ],
+  providers: [AppService],
 })
 export class AppModule {}

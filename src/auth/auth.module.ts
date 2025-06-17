@@ -11,7 +11,8 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     UserModule,
     JwtModule.register({
-      // global: true,
+      secret: process.env.JWT_SECRET_KEY || 'default_secret',
+      signOptions: { expiresIn: process.env.TOKEN_EXPIRE_TIME },
     }),
   ],
   controllers: [AuthController],
@@ -23,5 +24,6 @@ import { JwtStrategy } from './jwt.strategy';
       useClass: JwtAuthGuard,
     },
   ],
+  exports: [JwtModule],
 })
 export class AuthModule {}
