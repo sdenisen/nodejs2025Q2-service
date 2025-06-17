@@ -4,8 +4,8 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { LoggingService } from './logging.service';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class LoggingInterceptor implements NestInterceptor {
     );
 
     return next.handle().pipe(
-      tap((data) => {
+      tap(() => {
         const res = context.switchToHttp().getResponse();
         const statusCode = res.statusCode;
         const duration = Date.now() - now;

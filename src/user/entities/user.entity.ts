@@ -12,8 +12,12 @@ export class User {
   @Exclude()
   password: string;
 
-  constructor(public login: string, password: string) {
+  constructor(
+    public login: string,
+    password: string,
+  ) {
     this.id = uuidv4();
+    this.login = login;
     this.version = 1;
     this.createdAt = Date.now();
     this.updatedAt = Date.now();

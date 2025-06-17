@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -81,5 +85,17 @@ export class UserService {
       where: { id: id },
     });
     await this.prisma.user.delete({ where: { id: _user.id } });
+  }
+
+  async getByLogin(login: string) {
+    const userPrisma = await this.prisma.user.findFirst({
+      where: { login: login },
+    });
+
+    if (!userPrisma) {
+      throw new NotFoundException('User not found');
+    }
+
+    return userPrisma;
   }
 }

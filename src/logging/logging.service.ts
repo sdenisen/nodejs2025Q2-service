@@ -37,14 +37,13 @@ export class LoggingService extends ConsoleLogger {
   }
 
   private writeToFile(level: LogLevel, message: string) {
-    const formatted = `[${new Date().toISOString()}] ${message}\n`;
     if (!this.shouldLog(level)) {
       return;
     }
     fs.appendFileSync(this.logFile, message);
   }
 
-  async log(message: unknown, context?: unknown) {
+  async log(message: unknown) {
     this.writeToFile(LogLevel.INFO, `${message}\n`);
   }
 

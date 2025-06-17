@@ -1,12 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { eFavs } from './entities/favs.entity';
-import { DatabaseService } from 'src/database/database.service';
-import { getOrThrow } from '../common/get-or-throw';
-import { favsEnsureHas } from '../common/favs-ensure-has';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoggingService } from '../logging/logging.service';
 

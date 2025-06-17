@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Favs } from '../favs/entities/favs.entity';
 
-export function favsEnsureHas<T = any>(
+export function favsEnsureHas(
   map: Favs,
   id: string,
   entity_name: string,
