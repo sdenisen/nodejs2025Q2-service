@@ -55,11 +55,11 @@ export class UserService {
     const _user = await this.prisma.user.findUniqueOrThrow({
       where: { id: id },
     });
-
-    if (_user.password !== oldPassword) {
+    const isPasswordMatches = await bcrypt.compare(oldPassword, _user.password);
+    if (!isPasswordMatches) {
       throw new ForbiddenException('Old password is wrong');
     }
-
+    newPassword = await bcrypt.hash(newPassword, 10);
     const updated_user = await this.prisma.user.update({
       where: { id: _user.id },
       data: {

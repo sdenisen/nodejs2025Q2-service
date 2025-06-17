@@ -28,15 +28,12 @@ export class JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
 
     const token = this.extractToken(request);
-    console.log('we are here...!');
 
-    console.log('headers:', request.headers);
     if (!token) throw new UnauthorizedException('Token required');
-    console.log('we are here...1!1');
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET || 'defaultSecret',
+        secret: process.env.JWT_SECRET_KEY || 'defaultSecret',
       });
       request.user = payload;
     } catch (error) {

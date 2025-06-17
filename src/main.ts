@@ -4,9 +4,10 @@ import { PrismaNotFoundExceptionFilter } from './prisma/prisma-exception.filter'
 import { LoggingInterceptor } from './logging/logging.interceptor';
 import { LoggingService } from './logging/logging.service';
 import { AllExceptionsFilter } from './common/all-exceptions-filter';
+import 'dotenv/config';
 
 async function bootstrap() {
-  const PORT = process.env.PORT || 4000;
+  const PORT = Number(process.env.PORT) || 4000;
   const app = await NestFactory.create(AppModule);
 
   const logger = new LoggingService();

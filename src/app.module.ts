@@ -11,9 +11,9 @@ import { DatabaseModule } from './database/database.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggingModule } from './logging/logging.module';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthGuard } from './auth/auth.guard';
 
 @Module({
   imports: [
@@ -29,17 +29,17 @@ import { JwtModule } from '@nestjs/jwt';
     AuthModule,
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET || 'default_secret',
+      secret: process.env.JWT_SECRET_KEY || 'default_secret',
       signOptions: { expiresIn: '1h' },
     }),
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: AuthGuard,
     },
+    AppService,
   ],
 })
 export class AppModule {}
