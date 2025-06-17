@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { Public } from './public.decorator';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  @Public()
   async signUp(username: string, pass: string) {
     const user = await this.userService.create({
       login: username,
@@ -23,14 +25,19 @@ export class AuthService {
     return { id: user.id };
   }
 
+  @Public()
   async signIn(username: string, pass: string) {
     const user = await this.userService.getByLogin(username);
-
     const isPasswordMatches = await bcrypt.compare(pass, user.password);
+
+    console.log(user.password);
+    console.log(pass);
+    console.log(isPasswordMatches);
 
     if (!isPasswordMatches) {
       throw new UnauthorizedException();
     }
+    console.log('we are here singIn');
 
     const payload = { userId: user.id, login: user.login };
 
@@ -46,6 +53,7 @@ export class AuthService {
     };
   }
 
+  @Public()
   async refresh(refrestToken: string) {
     if (refrestToken === undefined) {
       throw new UnauthorizedException();
